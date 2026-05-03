@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Embed Generator</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600&family=Google+Sans+Display:wght@400;500&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --p-main:#d0bcff;--p-on-main:#381e72;
+  --p-container:#4f378b;--p-on-container:#eaddff;
+  --s-container:#4a4458;--s-on-container:#e8def8;
+  --bg:#141218;--bg2:#1d1b20;--bg3:#211f26;--bg4:#2b2930;--bg5:#36343b;
+  --onsurface:#e6e1e5;--onsurfacevar:#cac4d0;
+  --outline:#938f99;--outlinevar:#49454f;
+  --rf:100px;--rxl:16px;--rlg:12px;--rsm:8px;
+}
+html,body{min-height:100%;font-family:'Google Sans',system-ui,sans-serif;background:var(--bg);color:var(--onsurface);font-size:14px;line-height:1.5;}
+
+.topbar{background:var(--bg2);border-bottom:1px solid var(--outlinevar);height:64px;display:flex;align-items:center;gap:12px;padding:0 24px;position:sticky;top:0;z-index:50;}
+.topbar-logo{width:40px;height:40px;border-radius:50%;background:var(--p-container);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.topbar-logo .material-symbols-outlined{font-size:20px;color:var(--p-on-container);}
+.topbar-title{font-family:'Google Sans Display',sans-serif;font-size:20px;font-weight:500;flex:1;}
+.topbar-badge{font-size:11px;padding:4px 12px;border-radius:var(--rf);background:var(--bg4);color:var(--onsurfacevar);}
+
+.layout{max-width:1080px;margin:0 auto;padding:24px;display:grid;grid-template-columns:1fr 360px;gap:24px;align-items:start;}
+@media(max-width:760px){.layout{grid-template-columns:1fr;padding:16px;}.topbar{padding:0 16px;}.topbar-badge{display:none;}}
+
+.card{background:var(--bg2);border:1px solid var(--outlinevar);border-radius:var(--rxl);overflow:hidden;margin-bottom:16px;}
+.card-head{padding:16px 16px 0;display:flex;align-items:center;gap:10px;}
+.card-head .material-symbols-outlined{font-size:18px;color:var(--p-main);}
+.card-head-title{font-size:14px;font-weight:500;flex:1;}
+.card-head-sub{font-size:11px;color:var(--onsurfacevar);}
+.card-body{padding:14px 16px 16px;}
+
+.field{position:relative;}
+.field label{position:absolute;top:-8px;left:10px;background:var(--bg2);padding:0 4px;font-size:11px;color:var(--onsurfacevar);z-index:1;pointer-events:none;}
+.field input{width:100%;background:transparent;border:1px solid var(--outline);border-radius:4px;color:var(--onsurface);font-family:'Google Sans',sans-serif;font-size:14px;padding:12px 14px;outline:none;transition:border-color .2s;appearance:none;}
+.field input:focus{border-color:var(--p-main);border-width:2px;}
+
+.field-manual-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;padding:2px 8px;border-radius:var(--rf);background:var(--bg4);color:var(--onsurfacevar);border:1px solid var(--outlinevar);margin-bottom:10px;}
+.field-manual-badge .material-symbols-outlined{font-size:12px;}
+
+.color-row{display:flex;align-items:center;gap:10px;}
+.color-row .field{flex:1;}
+.swatch{width:40px;height:40px;border-radius:var(--rsm);border:1px solid var(--outlinevar);overflow:hidden;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.swatch input[type=color]{width:56px;height:56px;margin:-8px;border:none;cursor:pointer;background:none;padding:0;}
+
+.codesurface{background:var(--bg5);border-radius:var(--rlg);overflow:hidden;}
+.codebar{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;background:var(--bg4);border-bottom:1px solid var(--outlinevar);}
+.codebar span{font-size:11px;color:var(--onsurfacevar);font-family:monospace;}
+.codetext{font-size:11px;font-family:monospace;color:#86c98a;padding:12px 14px;word-break:break-all;line-height:1.7;min-height:48px;white-space:pre-wrap;}
+
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:0 18px;height:40px;border-radius:var(--rf);font-family:'Google Sans',sans-serif;font-size:14px;font-weight:500;border:none;cursor:pointer;transition:filter .15s;white-space:nowrap;text-decoration:none;}
+.btn:hover{filter:brightness(1.1);}
+.btn .material-symbols-outlined{font-size:17px;}
+.btn-filled{background:var(--p-main);color:var(--p-on-main);}
+.btn-tonal{background:var(--s-container);color:var(--s-on-container);}
+.btn-outlined{background:transparent;color:var(--p-main);border:1px solid var(--outline);}
+
+.preview-label{font-size:11px;font-weight:500;color:var(--onsurfacevar);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;}
+.preview-wrap{background:var(--bg3);border:1px solid var(--outlinevar);border-radius:var(--rxl);padding:16px;display:flex;align-items:center;justify-content:center;}
+.preview-note{font-size:11px;color:var(--onsurfacevar);margin-top:10px;text-align:center;}
+
+.toast{position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--onsurface);color:var(--bg);padding:12px 22px;border-radius:var(--rlg);font-size:14px;font-weight:500;z-index:9999;transition:transform .25s cubic-bezier(.34,1.56,.64,1),opacity .2s;opacity:0;pointer-events:none;display:flex;align-items:center;gap:10px;}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+.toast .material-symbols-outlined{font-size:17px;color:#6750a4;}
+
+.embed-root{
+  --ep-main:#d0bcff;--ep-on-main:#381e72;
+  --ep-container:#4f378b;--ep-on-container:#eaddff;
+  --ebg:#141218;--ebg2:#1d1b20;
+  --eonsurface:#e6e1e5;--eonsurfacevar:#cac4d0;
+  --eoutlinevar:#49454f;
+  width:340px;max-width:100%;font-family:'Google Sans',system-ui,sans-serif;font-size:14px;line-height:1.5;
+}
+.embed-box{background:var(--ebg2);border:1px solid var(--eoutlinevar);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;}
+.embed-banner{width:100%;aspect-ratio:16/5;object-fit:cover;display:block;}
+.embed-banner-ph{width:100%;aspect-ratio:16/5;background:var(--ep-container);display:flex;align-items:center;justify-content:center;opacity:.55;}
+.embed-banner-ph .material-symbols-outlined{font-size:28px;color:var(--ep-on-container);opacity:.5;}
+.embed-header{display:flex;align-items:center;gap:12px;padding:12px 16px 0;}
+.embed-icon{width:44px;height:44px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid var(--ebg2);}
+.embed-icon-ph{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:var(--ep-container);border:2px solid var(--ebg2);}
+.embed-icon-ph .material-symbols-outlined{font-size:20px;color:var(--ep-on-container);}
+.embed-name{font-size:15px;font-weight:600;color:var(--eonsurface);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.embed-members{font-size:11px;color:var(--eonsurfacevar);display:flex;align-items:center;gap:3px;margin-top:2px;}
+.embed-members .material-symbols-outlined{font-size:12px;}
+.embed-body{padding:10px 16px 16px;display:flex;flex-direction:column;gap:10px;}
+.embed-online{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--eonsurfacevar);}
+.embed-online-dot{width:8px;height:8px;border-radius:50%;background:#3db887;flex-shrink:0;}
+.embed-desc{font-size:13px;color:var(--eonsurfacevar);line-height:1.55;}
+.embed-join{height:40px;border-radius:100px;border:none;background:var(--ep-main);color:var(--ep-on-main);font-family:'Google Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;text-decoration:none;width:100%;transition:filter .15s;}
+.embed-join:hover{filter:brightness(1.12);}
+.embed-join .material-symbols-outlined{font-size:16px;}
+.embed-powered{font-size:10px;padding:0 16px 10px;text-align:right;color:var(--eonsurfacevar);opacity:.4;}
+.embed-loading{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:40px 16px;color:var(--eonsurfacevar);font-size:13px;}
+@keyframes espin{to{transform:rotate(360deg)}}
+.embed-spin{animation:espin 1s linear infinite;display:inline-block;font-size:28px;color:var(--eonsurfacevar);}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-logo"><span class="material-symbols-outlined">widgets</span></div>
+  <span class="topbar-title">Embed Generator</span>
+  <span class="topbar-badge">avalilac.github.io/embedgen</span>
+</div>
+
+<div class="layout">
+  <div>
+
+    <div class="card">
+      <div class="card-head">
+        <span class="material-symbols-outlined">link</span>
+        <span class="card-head-title">Invite Link</span>
+      </div>
+      <div class="card-body">
+        <div class="field">
+          <label>Server invite URL</label>
+          <input type="url" id="f-invite" placeholder="https://stt.gg/Vg8SbxQ4" autocomplete="off" spellcheck="false"/>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <span class="material-symbols-outlined">edit_note</span>
+        <span class="card-head-title">Server Info</span>
+        <span class="card-head-sub">Fallback if not fetched automatically</span>
+      </div>
+      <div class="card-body">
+        <div class="field">
+          <label>Server name</label>
+          <input type="text" id="f-name" placeholder="My Server" autocomplete="off" spellcheck="false"/>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <span class="material-symbols-outlined">description</span>
+        <span class="card-head-title">Server Description</span>
+      </div>
+      <div class="card-body">
+        <div class="field-manual-badge">
+          <span class="material-symbols-outlined">edit</span>
+          The Description is not possible to fetch on Stoat. So you have to enter it here
+        </div>
+        <div class="field">
+          <label>Description</label>
+          <input type="text" id="f-desc" placeholder="A short description of your server" autocomplete="off" spellcheck="false"/>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <span class="material-symbols-outlined">palette</span>
+        <span class="card-head-title">Theme Color</span>
+        <span class="card-head-sub">Seeds the full M3 dark palette</span>
+      </div>
+      <div class="card-body">
+        <div class="color-row">
+          <div class="field">
+            <label>Hex color</label>
+            <input type="text" id="f-color-text" placeholder="#6750A4" maxlength="7" autocomplete="off" spellcheck="false"/>
+          </div>
+          <div class="swatch"><input type="color" id="f-color-pick" value="#6750A4"/></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <span class="material-symbols-outlined">code</span>
+        <span class="card-head-title">Generated URL</span>
+      </div>
+      <div class="card-body">
+        <div class="codesurface">
+          <div class="codebar"><span>embed link</span></div>
+          <div class="codetext" id="url-out">Fill in the fields above.</div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-filled" id="btn-copy"><span class="material-symbols-outlined">content_copy</span>Copy link</button>
+          <a class="btn btn-outlined" id="btn-open" href="#" target="_blank" rel="noopener"><span class="material-symbols-outlined">open_in_new</span>Open</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <span class="material-symbols-outlined">integration_instructions</span>
+        <span class="card-head-title">iframe Embed Code</span>
+      </div>
+      <div class="card-body">
+        <div class="codesurface">
+          <div class="codebar"><span>html</span></div>
+          <div class="codetext" id="iframe-out">Fill in the fields above.</div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-tonal" id="btn-copy-iframe"><span class="material-symbols-outlined">content_copy</span>Copy iframe</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div>
+    <div class="preview-label">Live preview</div>
+    <div class="preview-wrap">
+      <div class="embed-root" id="embed-root">
+        <div class="embed-box" id="embed-box">
+          <div class="embed-loading">
+            <span class="material-symbols-outlined embed-spin">progress_activity</span>
+            <span>Fill in the fields to preview</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="preview-note">Preview updates instantly as you type</p>
+  </div>
+</div>
+
+<div class="toast" id="toast">
+  <span class="material-symbols-outlined">check_circle</span>
+  <span id="toast-msg">Copied!</span>
+</div>
+
+<script>
+const BASE = "https://avalilac.github.io/embedgen/embed.html";
+const API_BASE = "https://api.stoat.chat";
+const CDN_BASE = "https://cdn.stoatusercontent.com";
+
+let toastT = null;
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  document.getElementById("toast-msg").textContent = msg;
+  t.classList.add("show");
+  clearTimeout(toastT);
+  toastT = setTimeout(() => t.classList.remove("show"), 2200);
+}
+
+function getVals() {
+  return {
+    invite: document.getElementById("f-invite").value.trim(),
+    name:   document.getElementById("f-name").value.trim(),
+    desc:   document.getElementById("f-desc").value.trim(),
+    color:  (document.getElementById("f-color-text").value.trim() || "#6750A4").replace(/^#/, ""),
+  };
+}
+
+function buildUrl(v) {
+  const p = new URLSearchParams();
+  if (v.invite) p.set("invite", v.invite);
+  if (v.name)   p.set("name",   v.name);
+  if (v.desc)   p.set("desc",   v.desc);
+  if (v.color)  p.set("color",  v.color);
+  const qs = p.toString();
+  return qs ? BASE + "#" + qs : BASE;
+}
+
+function esc(s) {
+  return String(s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+function hexToHsl(hex) {
+  let r = parseInt(hex.slice(1,3),16)/255, g = parseInt(hex.slice(3,5),16)/255, b = parseInt(hex.slice(5,7),16)/255;
+  const mx = Math.max(r,g,b), mn = Math.min(r,g,b);
+  let h, s, l = (mx+mn)/2;
+  if (mx === mn) { h = s = 0; } else {
+    const d = mx - mn;
+    s = l > .5 ? d/(2-mx-mn) : d/(mx+mn);
+    switch (mx) {
+      case r: h = ((g-b)/d+(g<b?6:0))/6; break;
+      case g: h = ((b-r)/d+2)/6; break;
+      case b: h = ((r-g)/d+4)/6; break;
+    }
+  }
+  return [Math.round(h*360), Math.round(s*100), Math.round(l*100)];
+}
+
+function applyEmbedTheme(root, hex) {
+  if (!hex || !/^#[0-9a-fA-F]{6}$/.test(hex)) return;
+  const [h, s] = hexToHsl(hex);
+  const hs = `${h},${Math.min(s+10,100)}%`;
+  root.style.setProperty("--ep-main",        `hsl(${hs},80%)`);
+  root.style.setProperty("--ep-on-main",      `hsl(${h},40%,12%)`);
+  root.style.setProperty("--ep-container",    `hsl(${hs},28%)`);
+  root.style.setProperty("--ep-on-container", `hsl(${hs},90%)`);
+  root.style.setProperty("--ebg",             `hsl(${h},12%,7%)`);
+  root.style.setProperty("--ebg2",            `hsl(${h},11%,11%)`);
+  root.style.setProperty("--eoutlinevar",     `hsl(${h},9%,27%)`);
+  root.style.setProperty("--eonsurfacevar",   `hsl(${h},11%,76%)`);
+  root.style.setProperty("--eonsurface",      `hsl(${h},14%,90%)`);
+}
+
+function isStoat(url) {
+  try { return new URL(url).hostname === "stt.gg"; } catch(_) { return false; }
+}
+
+let lastFetchedInvite = null;
+let cachedStoat = null;
+let fetchAbort = null;
+
+async function fetchStoat(code, signal) {
+  const res = await fetch(`${API_BASE}/invites/${code}`, { signal });
+  if (!res.ok) return null;
+  const d = await res.json();
+  const bid = d.server_banner?._id || null, iid = d.server_icon?._id || null;
+  return {
+    name: d.server_name || null,
+    memberCount: d.member_count || null,
+    onlineCount: d.online_count || null,
+    bannerUrl: bid ? `${CDN_BASE}/banners/${bid}?width=640` : null,
+    iconUrl:   iid ? `${CDN_BASE}/icons/${iid}?width=128`  : null,
+  };
+}
+
+function renderNative(v, stoat) {
+  const root = document.getElementById("embed-root");
+  const box  = document.getElementById("embed-box");
+
+  applyEmbedTheme(root, "#" + v.color);
+
+  const name = stoat?.name || v.name || "Server";
+  const desc = v.desc || "";
+  const link = v.invite || "#";
+
+  const bannerHtml = stoat?.bannerUrl
+    ? `<img class="embed-banner" src="${esc(stoat.bannerUrl)}" alt="" loading="lazy"/>`
+    : `<div class="embed-banner-ph"><span class="material-symbols-outlined">explore</span></div>`;
+
+  const iconHtml = stoat?.iconUrl
+    ? `<img class="embed-icon" src="${esc(stoat.iconUrl)}" alt="" loading="lazy"/>`
+    : `<div class="embed-icon-ph"><span class="material-symbols-outlined">dns</span></div>`;
+
+  const membersHtml = stoat?.memberCount
+    ? `<div class="embed-members"><span class="material-symbols-outlined">group</span>${Number(stoat.memberCount).toLocaleString()} members</div>`
+    : "";
+
+  const onlineHtml = stoat?.onlineCount
+    ? `<div class="embed-online"><div class="embed-online-dot"></div>${Number(stoat.onlineCount).toLocaleString()} online</div>`
+    : "";
+
+  box.innerHTML = `
+    ${bannerHtml}
+    <div class="embed-header">
+      ${iconHtml}
+      <div style="flex:1;min-width:0;">
+        <div class="embed-name">${esc(name)}</div>
+        ${membersHtml}
+      </div>
+    </div>
+    <div class="embed-body">
+      ${onlineHtml}
+      ${desc ? `<div class="embed-desc">${esc(desc)}</div>` : ""}
+      <a class="embed-join" href="${esc(link)}" target="_blank" rel="noopener">
+        <span class="material-symbols-outlined">login</span>
+        Join Server
+      </a>
+    </div>
+    <div class="embed-powered">avalilac.github.io/embedgen</div>
+  `;
+
+  requestAnimationFrame(() => updateOutputs(v));
+}
+
+function showLoadingState() {
+  document.getElementById("embed-box").innerHTML = `
+    <div class="embed-loading">
+      <span class="material-symbols-outlined embed-spin">progress_activity</span>
+      <span>Fetching server info…</span>
+    </div>`;
+}
+
+function updateOutputs(v) {
+  const url = buildUrl(v);
+  document.getElementById("url-out").textContent = url;
+  document.getElementById("btn-open").href = url;
+
+  const box = document.getElementById("embed-box");
+  const h = box.getBoundingClientRect().height || box.offsetHeight || 220;
+  const hRounded = Math.ceil(h) + 18;
+
+  document.getElementById("iframe-out").textContent =
+    `<iframe\n  src="${url}"\n  width="340"\n  height="${hRounded}"\n  style="border:none;border-radius:16px;overflow:hidden;"\n  loading="lazy"\n></iframe>`;
+}
+
+let debounceT = null;
+
+async function update() {
+  const v = getVals();
+  const invite = v.invite;
+
+  if (invite && isStoat(invite)) {
+    if (invite !== lastFetchedInvite) {
+      lastFetchedInvite = invite;
+      cachedStoat = null;
+      showLoadingState();
+
+      if (fetchAbort) fetchAbort.abort();
+      fetchAbort = new AbortController();
+      try {
+        const code = invite.split("/").pop();
+        cachedStoat = await fetchStoat(code, fetchAbort.signal);
+      } catch(_) {
+        cachedStoat = null;
+      }
+    }
+    renderNative(v, cachedStoat);
+  } else {
+    if (invite !== lastFetchedInvite) {
+      lastFetchedInvite = invite;
+      cachedStoat = null;
+    }
+    renderNative(v, null);
+  }
+}
+
+function debouncedUpdate() {
+  clearTimeout(debounceT);
+  debounceT = setTimeout(update, 80);
+}
+
+["f-invite", "f-name", "f-desc", "f-color-text"].forEach(id => {
+  const el = document.getElementById(id);
+  el.addEventListener("input", debouncedUpdate);
+  el.addEventListener("paste", e => e.stopPropagation());
+  el.addEventListener("keydown", e => e.stopPropagation());
+});
+
+const colorText = document.getElementById("f-color-text");
+const colorPick = document.getElementById("f-color-pick");
+
+colorPick.addEventListener("input", () => {
+  colorText.value = colorPick.value;
+  debouncedUpdate();
+});
+
+colorText.addEventListener("input", () => {
+  const val = colorText.value.trim();
+  if (/^#?[0-9a-fA-F]{6}$/.test(val)) colorPick.value = val.startsWith("#") ? val : "#" + val;
+  debouncedUpdate();
+});
+
+document.getElementById("btn-copy").addEventListener("click", () => {
+  navigator.clipboard.writeText(document.getElementById("url-out").textContent)
+    .then(() => showToast("Embed link copied!"));
+});
+
+document.getElementById("btn-copy-iframe").addEventListener("click", () => {
+  navigator.clipboard.writeText(document.getElementById("iframe-out").textContent)
+    .then(() => showToast("iframe code copied!"));
+});
+
+update();
+</script>
+</body>
+</html>
